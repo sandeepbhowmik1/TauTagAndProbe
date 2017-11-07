@@ -29,6 +29,7 @@
 <use name="CommonTools/UtilAlgos"/>
 <use name="FWCore/ServiceRegistry"/>
 <use name="HLTrigger/HLTcore"/>
+<use name="TauTagAndProbe/TauTagAndProbe"/>
 
 <flags EDM_PLUGIN="1"/>
 
