@@ -577,13 +577,13 @@ int Ntuplizer_noTagAndProbe_multipleTaus::FillJet(const edm::View<pat::Jet> *jet
     _jets_HadronFlavour.push_back(ijet->hadronFlavour());
     _jets_PUJetID.push_back(ijet->userFloat("pileupJetId:fullDiscriminant"));
     _jets_PUJetIDupdated.push_back(ijet->hasUserFloat("pileupJetIdUpdated:fullDiscriminant") ? ijet->userFloat("pileupJetIdUpdated:fullDiscriminant") : -999);
-    float vtxPx = ijet->userFloat ("vtxPx");
-    float vtxPy = ijet->userFloat ("vtxPy");
-    _jets_vtxPt.  push_back(TMath::Sqrt(vtxPx*vtxPx + vtxPy*vtxPy));
-    _jets_vtxMass.push_back(ijet->userFloat("vtxMass"));
-    _jets_vtx3dL. push_back(ijet->userFloat("vtx3DVal"));
-    _jets_vtxNtrk.push_back(ijet->userFloat("vtxNtracks"));
-    _jets_vtx3deL.push_back(ijet->userFloat("vtx3DSig"));
+    // float vtxPx = ijet->userFloat ("vtxPx");
+    // float vtxPy = ijet->userFloat ("vtxPy");
+    // _jets_vtxPt.  push_back(TMath::Sqrt(vtxPx*vtxPx + vtxPy*vtxPy));
+    // _jets_vtxMass.push_back(ijet->userFloat("vtxMass"));
+    // _jets_vtx3dL. push_back(ijet->userFloat("vtx3DVal"));
+    // _jets_vtxNtrk.push_back(ijet->userFloat("vtxNtracks"));
+    // _jets_vtx3deL.push_back(ijet->userFloat("vtx3DSig"));
 
     _bdiscr.push_back(ijet->bDiscriminator("pfJetProbabilityBJetTags"));
     _bdiscr2.push_back(ijet->bDiscriminator("pfCombinedInclusiveSecondaryVertexV2BJetTags"));
