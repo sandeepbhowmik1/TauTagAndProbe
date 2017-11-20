@@ -26,6 +26,7 @@
 #include "HLTrigger/HLTcore/interface/HLTConfigProvider.h"
 #include "DataFormats/L1Trigger/interface/Tau.h"
 #include "DataFormats/L1Trigger/interface/Jet.h"
+#include "DataFormats/L1Trigger/interface/EtSum.h"
 #include "DataFormats/L1Trigger/interface/EGamma.h"
 #include "DataFormats/L1Trigger/interface/Muon.h"
 #include "DataFormats/VertexReco/interface/Vertex.h"
@@ -123,6 +124,18 @@ private:
   std::vector<int> _l1tEmuTowerIEtaJet;
   std::vector<int> _l1tEmuTowerIPhiJet;
   std::vector<int> _l1tEmuRawEtJet; 
+
+  std::vector<short int> _l1tSumType;
+  std::vector<float> _l1tSumEt;
+  std::vector<float> _l1tSumPhi;
+  std::vector<float> _l1tSumIEt;
+  std::vector<float> _l1tSumIPhi;
+
+  std::vector<short int> _l1tEmuSumType;
+  std::vector<float> _l1tEmuSumEt;
+  std::vector<float> _l1tEmuSumPhi;
+  std::vector<float> _l1tEmuSumIEt;
+  std::vector<float> _l1tEmuSumIPhi;
 
   std::vector<int> _l1tEGQual;
   std::vector<float> _l1tEGPt;
@@ -237,6 +250,8 @@ private:
   edm::EDGetTokenT<l1t::TauBxCollection> _L1EmuTauTag  ;
   edm::EDGetTokenT<l1t::JetBxCollection> _l1tJetTag;
   edm::EDGetTokenT<l1t::JetBxCollection> _l1tEmuJetTag;
+  edm::EDGetTokenT<l1t::EtSumBxCollection> _l1tSumTag;
+  edm::EDGetTokenT<l1t::EtSumBxCollection> _l1tEmuSumTag;
   edm::EDGetTokenT<l1t::EGammaBxCollection> _L1EGTag  ;
   edm::EDGetTokenT<l1t::EGammaBxCollection> _L1EmuEGTag  ;
   edm::EDGetTokenT<l1t::MuonBxCollection> _L1MuTag  ;
@@ -286,6 +301,8 @@ ZeroBias::ZeroBias(const edm::ParameterSet& iConfig) :
   _L1EmuTauTag    (consumes<l1t::TauBxCollection>                   (iConfig.getParameter<edm::InputTag>("L1EmuTau"))),
   _l1tJetTag      (consumes<l1t::JetBxCollection>                     (iConfig.getParameter<edm::InputTag>("l1tJetCollection"))),
   _l1tEmuJetTag   (consumes<l1t::JetBxCollection>                     (iConfig.getParameter<edm::InputTag>("l1tEmuJetCollection"))),
+  _l1tSumTag      (consumes<l1t::EtSumBxCollection>                     (iConfig.getParameter<edm::InputTag>("L1SumCollection"))),
+  _l1tEmuSumTag   (consumes<l1t::EtSumBxCollection>                     (iConfig.getParameter<edm::InputTag>("L1EmuSumCollection"))),
   _L1EGTag       (consumes<l1t::EGammaBxCollection>                   (iConfig.getParameter<edm::InputTag>("L1EG"))),
   _L1EmuEGTag    (consumes<l1t::EGammaBxCollection>                   (iConfig.getParameter<edm::InputTag>("L1EmuEG"))),
   _L1MuTag       (consumes<l1t::MuonBxCollection>                   (iConfig.getParameter<edm::InputTag>("L1Mu"))),
@@ -430,6 +447,18 @@ void ZeroBias::Initialize() {
   this -> _l1tEmuTowerIEtaJet .clear();
   this -> _l1tEmuTowerIPhiJet .clear();
   this -> _l1tEmuRawEtJet     .clear();
+
+  this -> _l1tSumType.clear();
+  this -> _l1tSumEt.clear();
+  this -> _l1tSumPhi.clear();
+  this -> _l1tSumIEt.clear();
+  this -> _l1tSumIPhi.clear();
+
+  this -> _l1tEmuSumType.clear();
+  this -> _l1tEmuSumEt.clear();
+  this -> _l1tEmuSumPhi.clear();
+  this -> _l1tEmuSumIEt.clear();
+  this -> _l1tEmuSumIPhi.clear();
 
   this -> _l1tEGPt .clear();
   this -> _l1tEGEta .clear();
@@ -590,6 +619,18 @@ void ZeroBias::beginJob()
   this -> _tree -> Branch("l1tEmuTowerIEtaJet", &_l1tEmuTowerIEtaJet);
   this -> _tree -> Branch("l1tEmuTowerIPhiJet", &_l1tEmuTowerIPhiJet);
   this -> _tree -> Branch("l1tEmuRawEtJet", &_l1tEmuRawEtJet);
+
+  this -> _tree -> Branch("l1tSumType", &_l1tSumType);
+  this -> _tree -> Branch("l1tSumEt", &_l1tSumEt);
+  this -> _tree -> Branch("l1tSumPhi", &_l1tSumPhi);
+  this -> _tree -> Branch("l1tSumIEt", &_l1tSumIEt);
+  this -> _tree -> Branch("l1tSumIPhi", &_l1tSumIPhi);
+
+  this -> _tree -> Branch("l1tEmuSumType", &_l1tEmuSumType);
+  this -> _tree -> Branch("l1tEmuSumEt", &_l1tEmuSumEt);
+  this -> _tree -> Branch("l1tEmuSumPhi", &_l1tEmuSumPhi);
+  this -> _tree -> Branch("l1tEmuSumIEt", &_l1tEmuSumIEt);
+  this -> _tree -> Branch("l1tEmuSumIPhi", &_l1tEmuSumIPhi);
 
   this -> _tree -> Branch("l1tEGPt",  &_l1tEGPt);
   this -> _tree -> Branch("l1tEGEta", &_l1tEGEta);
@@ -807,7 +848,35 @@ void ZeroBias::analyze(const edm::Event& iEvent, const edm::EventSetup& eSetup)
     
   }
   
+  edm::Handle<BXVector<l1t::EtSum>> l1tSumHandle;
+  try {iEvent.getByToken(this -> _l1tSumTag, l1tSumHandle);}  catch (...) {;}
 
+  if(l1tSumHandle.isValid()){
+    for(BXVector<l1t::EtSum>::const_iterator sum = l1tSumHandle -> begin(0); sum != l1tSumHandle -> end(0) ; sum++)
+      {
+	
+	this -> _l1tSumType.push_back(sum -> getType());
+	this -> _l1tSumEt  .  push_back(sum -> et());
+	this -> _l1tSumPhi . push_back(sum -> phi());
+	this -> _l1tSumIEt . push_back(sum -> hwPt());
+	this -> _l1tSumIPhi. push_back(sum -> hwPhi());
+      }
+  }
+
+  edm::Handle<BXVector<l1t::EtSum>> l1tEmuSumHandle;
+  try {iEvent.getByToken(this -> _l1tEmuSumTag, l1tEmuSumHandle);}  catch (...) {;}
+
+  if(l1tEmuSumHandle.isValid()){
+    for(BXVector<l1t::EtSum>::const_iterator sum = l1tEmuSumHandle -> begin(0); sum != l1tEmuSumHandle -> end(0) ; sum++)
+      {
+	
+	this -> _l1tEmuSumType.push_back(sum -> getType());
+	this -> _l1tEmuSumEt  .  push_back(sum -> et());
+	this -> _l1tEmuSumPhi . push_back(sum -> phi());
+	this -> _l1tEmuSumIEt . push_back(sum -> hwPt());
+	this -> _l1tEmuSumIPhi. push_back(sum -> hwPhi());
+      }
+  }
 
   edm::Handle< BXVector<l1t::EGamma> >  L1EGHandle;
   try {iEvent.getByToken(_L1EGTag, L1EGHandle);}  catch (...) {;}

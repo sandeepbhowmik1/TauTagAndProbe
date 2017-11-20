@@ -31,7 +31,9 @@ def splitInBlocks (l, n):
 
 njobs = 200
 #filelist = open("fileList_MC_RAW.txt")
-filelist = open("VBF_HToInvisible_M125_13TeV_powheg_pythia8_RAW.txt")
+filelist = open("ZeroBias_Run306091_RAW.txt")
+#filelist = open("ZeroBias_Run305310_RAW.txt")
+#filelist = open("VBF_HToInvisible_M125_13TeV_powheg_pythia8_RAW.txt")
 #filelist = open("VBFHToTauTau_M125_13TeV_powheg_pythia8_FlatPU28to62HcalNZSRAW_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1.txt")
 #filelist = open("ZeroBias1-5_Run283171.txt")
 
@@ -39,7 +41,9 @@ filelist = open("VBF_HToInvisible_M125_13TeV_powheg_pythia8_RAW.txt")
 #filelist = open("Data_SingleMu_2016RunB_PromptRecov2_1Luglio.txt")
 
 #folder = "ZeroBias1-5_Run283171_WithMarch2017Layer1_ShapeVeto_04_05_17"
-folder = "MC_L1_Hinv_HF_TPs_29_05_17"
+#folder = "MC_L1_Hinv_HF_TPs_29_05_17"
+folder = "ZeroBias_Run306091_RAW_mode"
+#folder = "ZeroBias_Run305310_RAW_mode"
 #folder = "MC_L1_May2017Layer1_HF_TPs_17_05_17"
 #folder = "MC_L1_May2017Layer1_HF_TPs_29_05_17"
 #folder = "Data_ZeroBias_Run277420_12x12"

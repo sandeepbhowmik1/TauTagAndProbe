@@ -115,7 +115,8 @@ else:
     #from L1Trigger.Configuration.customiseReEmul import L1TReEmulFromRAWsimTP
     #process = L1TReEmulFromRAWsimTP(process)
 
-process.load("L1Trigger.L1TCalorimeter.caloStage2Params_2017_v1_4_cfi")
+process.load("L1Trigger.L1TCalorimeter.caloStage2Params_2017_v1_10_mean_inconsistent_cfi")
+#process.load("L1Trigger.L1TCalorimeter.caloStage2Params_2017_v1_4_cfi")
 #process.load("L1Trigger.L1TCalorimeter.caloStage2Params_2016_v3_2_cfi")
 
 #### handling of cms line options for tier3 submission
