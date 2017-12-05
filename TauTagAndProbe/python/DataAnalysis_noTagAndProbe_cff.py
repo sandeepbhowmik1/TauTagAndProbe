@@ -59,11 +59,12 @@ Ntuplizer_noTagAndProbe = cms.EDAnalyzer("Ntuplizer_noTagAndProbe",
     L2CaloJet_ForIsoPix_IsoCollection = cms.InputTag("hltL2TauPixelIsoTagProducer", "", "TEST")   
 )
 
-TAndPseq = cms.Sequence( 
-    goodTaus      
+#TAndPseq = cms.Sequence( 
+#    goodTaus      
 #    genMatchedTaus 
-)
+#)
 
 NtupleSeq = cms.Sequence(
+    goodTaus +
     Ntuplizer_noTagAndProbe
 )
