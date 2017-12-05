@@ -33,7 +33,8 @@ if not isMC: # will use 92X
     process.load('TauTagAndProbe.TauTagAndProbe.DataAnalysis_noTagAndProbe_cff')
     process.source = cms.Source("PoolSource",
         fileNames = cms.untracked.vstring(
-            '/store/data/Run2017C/SingleMuon/MINIAOD/12Sep2017-v1/00000/001BA513-7DBB-E711-B839-7CD30ACE1762.root'
+            '/store/data/Run2017F/SingleMuon/MINIAOD/PromptReco-v1/000/306/456/00000/2EA49EC5-EAC7-E711-A9C5-FA163E83AE5D.root'
+            #'/store/data/Run2017C/SingleMuon/MINIAOD/12Sep2017-v1/00000/001BA513-7DBB-E711-B839-7CD30ACE1762.root'
             #'/store/data/Run2017A/SingleMuon/MINIAOD/PromptReco-v2/000/296/168/00000/084C505D-784C-E711-8140-02163E019DA4.root'
             #'/store/data/Run2016H/SingleMuon/MINIAOD/PromptReco-v2/000/282/092/00000/DE499C8E-1B8B-E611-8C93-02163E014207.root'
             #'/store/data/Run2016H/SingleMuon/MINIAOD/PromptReco-v2/000/282/092/00000/ACA10D13-2D8B-E611-820E-FA163E8FD709.root'
@@ -102,7 +103,7 @@ process.options = cms.untracked.PSet(
 )
 
 process.p = cms.Path(
-    process.TAndPseq +
+    #process.TAndPseq +
     process.NtupleSeq
 )
 

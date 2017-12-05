@@ -76,7 +76,8 @@ private:
   virtual void endRun(edm::Run const&, edm::EventSetup const&);
   void Initialize();
   bool hasFilters(const pat::TriggerObjectStandAlone&  obj , const std::vector<std::string>& filtersToLookFor);
-  int FillJet(const edm::View<pat::Jet> *jets, const edm::Event& event, JetCorrectionUncertainty* jecUnc);  
+  int FillJet(const edm::View<pat::Jet> *jets, const edm::Event& event);
+  // int FillJet(const edm::View<pat::Jet> *jets, const edm::Event& event, JetCorrectionUncertainty* jecUnc);  
 
   TTree *_tree;
   TTree *_triggerNamesTree;
@@ -211,8 +212,8 @@ Ntuplizer_noTagAndProbe::Ntuplizer_noTagAndProbe(const edm::ParameterSet& iConfi
   _triggerBits    (consumes<edm::TriggerResults>                    (iConfig.getParameter<edm::InputTag>("triggerResultsLabel"))),
   _L1TauTag       (consumes<l1t::TauBxCollection>                   (iConfig.getParameter<edm::InputTag>("L1Tau"))),
   _L1EmuTauTag    (consumes<l1t::TauBxCollection>                   (iConfig.getParameter<edm::InputTag>("L1EmuTau"))),
-_JetTag         (consumes<edm::View<pat::Jet>>                    (iConfig.getParameter<edm::InputTag>("jetCollection"))),
-_l1tJetTag      (consumes<BXVector<l1t::Jet>>                     (iConfig.getParameter<edm::InputTag>("l1tJetCollection"))),
+  _JetTag         (consumes<edm::View<pat::Jet>>                    (iConfig.getParameter<edm::InputTag>("jetCollection"))),
+  _l1tJetTag      (consumes<BXVector<l1t::Jet>>                     (iConfig.getParameter<edm::InputTag>("l1tJetCollection"))),
   _VtxTag         (consumes<std::vector<reco::Vertex>>              (iConfig.getParameter<edm::InputTag>("Vertexes")))
 {
   this -> _treeName = iConfig.getParameter<std::string>("treeName");
@@ -240,6 +241,7 @@ _l1tJetTag      (consumes<BXVector<l1t::Jet>>                     (iConfig.getPa
 
 
   this -> Initialize();
+
   return;
 }
 
@@ -248,6 +250,7 @@ Ntuplizer_noTagAndProbe::~Ntuplizer_noTagAndProbe()
 
 void Ntuplizer_noTagAndProbe::beginRun(edm::Run const& iRun, edm::EventSetup const& iSetup)
 {
+
   Bool_t changedConfig = false;
 
   if(!this -> _hltConfig.init(iRun, iSetup, this -> _processName.process(), changedConfig)){
@@ -276,6 +279,7 @@ void Ntuplizer_noTagAndProbe::beginRun(edm::Run const& iRun, edm::EventSetup con
 }
 
 void Ntuplizer_noTagAndProbe::Initialize() {
+
   this -> _indexevents = 0;
   this -> _runNumber = 0;
   this -> _lumi = 0;
@@ -490,51 +494,58 @@ void Ntuplizer_noTagAndProbe::analyze(const edm::Event& iEvent, const edm::Event
 
   //! TagAndProbe on HLT taus
   const edm::TriggerNames &names = iEvent.triggerNames(*triggerBits);
-  const pat::TauRef tau = (*tauHandle)[0] ;
 
-  this -> _tauTriggerBitSet.reset();
-
-
-
-  for (pat::TriggerObjectStandAlone  obj : *triggerObjects)
+  if(tauHandle->size()>0)
     {
-      const float dR = deltaR (*tau, obj);
-      if ( dR < 0.5)
-        {
-	  this -> _isMatched = true;
-	  this -> _hasTriggerTauType = obj.hasTriggerObjectType(trigger::TriggerTau);
-	  this -> _hasTriggerMuonType = obj.hasTriggerObjectType(trigger::TriggerMuon);
 
-	  obj.unpackPathNames(names);
-	  const edm::TriggerNames::Strings& triggerNames = names.triggerNames();
-	  //Looking for the path
-	  unsigned int x = 0;
-	  bool foundTrigger = false;
-	  for (const tParameterSet& parameter : this -> _parameters)
-            {
-	      if ((parameter.hltPathIndex >= 0)&&(obj.hasPathName(triggerNames[parameter.hltPathIndex], true, false)))
-                {
-		  foundTrigger = true;
-		  //Path found, now looking for the label 1, if present in the parameter set
-		  //std::cout << "==== FOUND PATH " << triggerNames[parameter.hltPathIndex] << " ====" << std::endl;
-		  //Retrieving filter list for the event
-		  const std::vector<std::string>& filters = (parameter.leg1 == 15)? (parameter.hltFilters1):(parameter.hltFilters2);
-		  if (this -> hasFilters(obj, filters))
-                    {
-		      //std::cout << "#### FOUND TAU WITH HLT PATH " << x << " ####" << std::endl;
-		      this -> _hltPt = obj.pt();
-		      this -> _hltEta = obj.eta();
-		      this -> _hltPhi = obj.phi();
-		      this -> _tauTriggerBitSet[x] = true;
-		      //std::cout << this -> _tauTriggerBitSet.to_string() << std::endl;
-                    }
-                }
-	      x++;
-            }
-	  if (foundTrigger) this -> _foundJet++;
-        }
+      const pat::TauRef tau = (*tauHandle)[0];
+
+      this -> _tauTriggerBitSet.reset();
+
+      for (pat::TriggerObjectStandAlone  obj : *triggerObjects)
+	{
+	  float dR = 999.;
+	  if(tauHandle->size()>0)
+	    {
+	      const pat::TauRef tau = (*tauHandle)[0];	      
+	      deltaR (*tau, obj);
+	    }
+	  if ( dR < 0.5)
+	    {
+	      this -> _isMatched = true;
+	      this -> _hasTriggerTauType = obj.hasTriggerObjectType(trigger::TriggerTau);
+	      this -> _hasTriggerMuonType = obj.hasTriggerObjectType(trigger::TriggerMuon);
+
+	      obj.unpackPathNames(names);
+	      const edm::TriggerNames::Strings& triggerNames = names.triggerNames();
+	      //Looking for the path
+	      unsigned int x = 0;
+	      bool foundTrigger = false;
+	      for (const tParameterSet& parameter : this -> _parameters)
+		{
+		  if ((parameter.hltPathIndex >= 0)&&(obj.hasPathName(triggerNames[parameter.hltPathIndex], true, false)))
+		    {
+		      foundTrigger = true;
+		      //Path found, now looking for the label 1, if present in the parameter set
+		      //std::cout << "==== FOUND PATH " << triggerNames[parameter.hltPathIndex] << " ====" << std::endl;
+		      //Retrieving filter list for the event
+		      const std::vector<std::string>& filters = (parameter.leg1 == 15)? (parameter.hltFilters1):(parameter.hltFilters2);
+		      if (this -> hasFilters(obj, filters))
+			{
+			  //std::cout << "#### FOUND TAU WITH HLT PATH " << x << " ####" << std::endl;
+			  this -> _hltPt = obj.pt();
+			  this -> _hltEta = obj.eta();
+			  this -> _hltPhi = obj.phi();
+			  this -> _tauTriggerBitSet[x] = true;
+			  //std::cout << this -> _tauTriggerBitSet.to_string() << std::endl;
+			}
+		    }
+		  x++;
+		}
+	      if (foundTrigger) this -> _foundJet++;
+	    }
+	}
     }
-
 
   //! TagAndProbe on L1T taus
 
@@ -563,7 +574,12 @@ void Ntuplizer_noTagAndProbe::analyze(const edm::Event& iEvent, const edm::Event
 
   for (l1t::TauBxCollection::const_iterator bx0TauIt = L1TauHandle->begin(0); bx0TauIt != L1TauHandle->end(0) ; bx0TauIt++)
     {
-      const float dR = deltaR(*tau, *bx0TauIt);
+      float dR = 999.;
+      if(tauHandle->size()>0)
+	{
+	  const pat::TauRef tau = (*tauHandle)[0];
+	  deltaR(*tau, *bx0TauIt);
+	}
       const l1t::Tau& l1tTau = *bx0TauIt;
 
       //dump check
@@ -590,7 +606,12 @@ void Ntuplizer_noTagAndProbe::analyze(const edm::Event& iEvent, const edm::Event
 	
       for (l1t::TauBxCollection::const_iterator bx0EmuTauIt = L1EmuTauHandle->begin(0); bx0EmuTauIt != L1EmuTauHandle->end(0) ; bx0EmuTauIt++)
 	{
-	  const float dR = deltaR(*tau, *bx0EmuTauIt);
+	  float dR = 999.;
+	  if(tauHandle->size()>0)
+	    {
+	      const pat::TauRef tau = (*tauHandle)[0];
+	      dR = deltaR(*tau, *bx0EmuTauIt);
+	    }
 	  const l1t::Tau& l1tEmuTau = *bx0EmuTauIt;
 	    
 	  cout<<"Emul Tau, pT = "<<l1tEmuTau.pt()<<", eta = "<<l1tEmuTau.eta()<<", phi = "<<l1tEmuTau.phi()<<endl;
@@ -615,11 +636,16 @@ void Ntuplizer_noTagAndProbe::analyze(const edm::Event& iEvent, const edm::Event
 	}
     }
 
-  this -> _tauPt = tau -> pt();
-  this -> _tauEta = tau -> eta();
-  this -> _tauPhi = tau -> phi();
-  this -> _tauCharge = tau -> charge();
-  this -> _tauDecayMode = tau -> decayMode();
+  if(tauHandle->size()>0)
+    {
+      const pat::TauRef tau = (*tauHandle)[0];
+
+      this -> _tauPt = tau -> pt();
+      this -> _tauEta = tau -> eta();
+      this -> _tauPhi = tau -> phi();
+      this -> _tauCharge = tau -> charge();
+      this -> _tauDecayMode = tau -> decayMode();
+    }
 
   this -> _Nvtx = vertexes->size();
 
@@ -630,12 +656,12 @@ void Ntuplizer_noTagAndProbe::analyze(const edm::Event& iEvent, const edm::Event
   //std::cout << "++++++++++ FILL ++++++++++" << std::endl;
 
   const edm::View<pat::Jet>* jets = jetHandle.product();
-  edm::ESHandle<JetCorrectorParametersCollection> JetCorParColl;
-  eSetup.get<JetCorrectionsRecord>().get("AK4PFchs",JetCorParColl); 
-  JetCorrectorParameters const & JetCorPar = (*JetCorParColl)["Uncertainty"];
-  JetCorrectionUncertainty jecUnc (JetCorPar);
-  _numberOfJets = FillJet(jets,iEvent, &jecUnc);
-
+  
+  //edm::ESHandle<JetCorrectorParametersCollection> JetCorParColl;
+  //eSetup.get<JetCorrectionsRecord>().get("AK4PFchs",JetCorParColl); 
+  //JetCorrectorParameters const & JetCorPar = (*JetCorParColl)["Uncertainty"];
+  //JetCorrectionUncertainty jecUnc (JetCorPar);
+  _numberOfJets = FillJet(jets,iEvent);//, &jecUnc);
 
   this -> _tree -> Fill();
 
@@ -664,7 +690,7 @@ bool Ntuplizer_noTagAndProbe::hasFilters(const pat::TriggerObjectStandAlone&  ob
   return true;
 }
 
-int Ntuplizer_noTagAndProbe::FillJet(const edm::View<pat::Jet> *jets, const edm::Event& event, JetCorrectionUncertainty* jecUnc){
+int Ntuplizer_noTagAndProbe::FillJet(const edm::View<pat::Jet> *jets, const edm::Event& event){//, JetCorrectionUncertainty* jecUnc){
   int nJets=0;
   vector <pair<float, int>> softLeptInJet; // pt, idx
   for(edm::View<pat::Jet>::const_iterator ijet = jets->begin(); ijet!=jets->end();++ijet){
@@ -802,9 +828,9 @@ int Ntuplizer_noTagAndProbe::FillJet(const edm::View<pat::Jet> *jets, const edm:
     //cout << "     --> sum pt, eta, phi: " << vSum.Pt() << " " << vSum.Eta() << " " << vSum.Phi() << endl;
     //if (abs(ijet->hadronFlavour()) == 5 ) cout << "     ------------ THIS WAS A B JET ------------" << endl;
     //cout << "RAW pt: " << jetRawPt << " | " << jetRawPt2 << " --> " << vSum.Pt() << endl;
-    jecUnc->setJetEta(ijet->eta());
-    jecUnc->setJetPt(ijet->pt()); // here you must use the CORRECTED jet pt
-    _jets_jecUnc.push_back(jecUnc->getUncertainty(true));
+    //jecUnc->setJetEta(ijet->eta());
+    //jecUnc->setJetPt(ijet->pt()); // here you must use the CORRECTED jet pt
+    //_jets_jecUnc.push_back(jecUnc->getUncertainty(true));
   }
 
   return nJets;
