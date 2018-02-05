@@ -6,6 +6,7 @@ process = cms.Process("TagAndProbe")
 isMC = False
 useGenMatch = False
 useCustomHLT = False
+useMassCuts = False
 
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 process.load("Configuration.StandardSequences.GeometryRecoDB_cff")
@@ -119,10 +120,10 @@ if useCustomHLT:
     process.Ntuplizer.L2CaloJet_ForIsoPix_Collection = cms.InputTag("hltL2TausForPixelIsolation", "", "MYHLT")
     process.Ntuplizer.L2CaloJet_ForIsoPix_IsoCollection = cms.InputTag("hltL2TauPixelIsoTagProducer", "", "MYHLT")
 
+process.TagAndProbe.useMassCuts = cms.bool(useMassCuts)
 
 if isMC and useGenMatch:
     process.Ntuplizer.taus = cms.InputTag("genMatchedTaus")
-
 
 if options.JSONfile:
     print "Using JSON: " , options.JSONfile
