@@ -125,7 +125,6 @@ process.TagAndProbe.useMassCuts = cms.bool(useMassCuts)
 if isMC and useGenMatch:
     process.Ntuplizer.taus = cms.InputTag("genMatchedTaus")
 
-
 if options.JSONfile:
     print "Using JSON: " , options.JSONfile
     process.source.lumisToProcess = LumiList.LumiList(filename = options.JSONfile).getVLuminosityBlockRange()
