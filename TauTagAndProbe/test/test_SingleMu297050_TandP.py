@@ -24,7 +24,11 @@ options.register ('JSONfile',
                   VarParsing.VarParsing.multiplicity.singleton, # singleton or list
                   VarParsing.VarParsing.varType.string,          # string, int, or float
                   "JSON file (empty for no JSON)")
-options.outputFile = 'NTuple_SingleMu.root'
+if not isMC:
+ 	options.outputFile = 'NTuple_SingleMu_Data_2017.root'
+else:	
+ 	options.outputFile = 'NTuple_SingleMu_DYMC_2017.root'
+
 options.inputFiles = []
 options.maxEvents  = -999
 options.parseArguments()
@@ -76,35 +80,34 @@ for idmod in my_id_modules:
 
 egmMod = 'egmGsfElectronIDs'
 mvaMod = 'electronMVAValueMapProducer'
-regMod = 'electronRegressionValueMapProducer'
-egmSeq = 'egmGsfElectronIDSequence'
 setattr(process,egmMod,process.egmGsfElectronIDs.clone())
 setattr(process,mvaMod,process.electronMVAValueMapProducer.clone())
-setattr(process,regMod,process.electronRegressionValueMapProducer.clone())
-setattr(process,egmSeq,cms.Sequence(getattr(process,mvaMod)*getattr(process,egmMod)*getattr(process,regMod)))
-process.electrons = cms.Sequence(getattr(process,mvaMod)*getattr(process,egmMod)*getattr(process,regMod))
+process.electrons = cms.Sequence(getattr(process,mvaMod)*getattr(process,egmMod))
 
 
 
 
 if not isMC:
     from Configuration.AlCa.autoCond import autoCond
-    process.GlobalTag.globaltag = '92X_dataRun2_HLT_v7'
+    process.GlobalTag.globaltag = '94X_dataRun2_ReReco_EOY17_v2' # 92X_dataRun2_HLT_v7'
     process.load('TauTagAndProbe.TauTagAndProbe.tagAndProbe_cff')
     process.source = cms.Source("PoolSource",
         fileNames = cms.untracked.vstring(
-            '/store/data/Run2017F/SingleMuon/USER/MuTau-PromptReco-v1/000/305/814/00000/0454A948-54BE-E711-9031-FA163E6983E4.root'
+           # '/store/data/Run2017F/SingleMuon/USER/MuTau-PromptReco-v1/000/305/814/00000/0454A948-54BE-E711-9031-FA163E6983E4.root'
+            #'/store/data/Run2017C/SingleMuon/MINIAOD/PromptReco-v2/000/300/576/00000/2E9321F4-8F7D-E711-8E33-02163E01A735.root'
+            '/store/data/Run2017E/SingleMuon/MINIAOD/17Nov2017-v1/50000/000DCB8B-2ADD-E711-9100-008CFAF35AC0.root'
         ),
     )
 
 
 
 else:
-    process.GlobalTag.globaltag = '92X_upgrade2017_realistic_v12'
+    process.GlobalTag.globaltag = '94X_mc2017_realistic_v10'  #'92X_upgrade2017_realistic_v12'
     process.load('TauTagAndProbe.TauTagAndProbe.MCanalysis_cff')
     process.source = cms.Source("PoolSource",
         fileNames = cms.untracked.vstring(            
-            '/store/mc/RunIISummer17MiniAOD/VBFHToTauTau_M125_13TeV_powheg_pythia8/MINIAODSIM/NZSFlatPU28to62_HIG07_92X_upgrade2017_realistic_v10-v1/70000/0080A67C-FBA4-E711-A8FE-00259029E84C.root'
+           # '/store/mc/RunIISummer17MiniAOD/VBFHToTauTau_M125_13TeV_powheg_pythia8/MINIAODSIM/NZSFlatPU28to62_HIG07_92X_upgrade2017_realistic_v10-v1/70000/0080A67C-FBA4-E711-A8FE-00259029E84C.root'
+			'/store/mc/RunIISummer17MiniAOD/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/MINIAODSIM/92X_upgrade2017_realistic_v10_ext1-v1/110000/02DD1F83-7187-E711-B939-0025905B8576.root'
         )
     )
 

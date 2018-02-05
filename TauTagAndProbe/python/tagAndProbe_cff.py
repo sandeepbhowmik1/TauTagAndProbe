@@ -206,7 +206,7 @@ goodMuons = cms.EDFilter("PATMuonRefSelector",
          #       'pt > 5 && abs(eta) < 2.1 ' # kinematics
                 'pt > 24 && abs(eta) < 2.1 ' # kinematics
                 '&& ( (pfIsolationR04().sumChargedHadronPt + max(pfIsolationR04().sumNeutralHadronEt + pfIsolationR04().sumPhotonEt - 0.5 * pfIsolationR04().sumPUPt, 0.0)) / pt() ) < 0.1 ' # isolation
-                '&& isLooseMuon()' # quality -- medium muon
+                '&& isMediumMuon()' # quality -- medium muon
         ),
         filter = cms.bool(True)
 )
@@ -221,7 +221,7 @@ goodTaus = cms.EDFilter("PATTauRefSelector",
                 'pt > 20 && abs(eta) < 2.1 ' #kinematics
                 '&& abs(charge) > 0 && abs(charge) < 2 ' #sometimes 2 prongs have charge != 1
                 '&& tauID("decayModeFinding") > 0.5 ' # tau ID
-                '&& tauID("byTightIsolationMVArun2v1DBoldDMwLT") > 0.5 '
+                '&& tauID("byMediumIsolationMVArun2v1DBoldDMwLT") > 0.5 '
                 '&& tauID("againstMuonTight3") > 0.5 ' # anti Muon tight
                 '&& tauID("againstElectronVLooseMVA6") > 0.5 ' # anti-Ele loose
         ),
@@ -242,7 +242,7 @@ TagAndProbe = cms.EDFilter("TauTagAndProbeFilter",
                            taus  = cms.InputTag("goodTaus"),
                            muons = cms.InputTag("goodMuons"),
                            met   = cms.InputTag("slimmedMETs"),
-                           useMassCuts = cms.bool(True),
+                           useMassCuts = cms.bool(False),
                            electrons = cms.InputTag("slimmedElectrons"),
                            eleLooseIdMap = cms.InputTag("egmGsfElectronIDs:mvaEleID-Spring16-HZZ-V1-wpLoose"),
                            bjets = cms.InputTag("bjets")
@@ -263,6 +263,8 @@ Ntuplizer = cms.EDAnalyzer("Ntuplizer",
     genPartCollection = cms.InputTag(""),
     muons = cms.InputTag("TagAndProbe"),
     taus = cms.InputTag("TagAndProbe"),
+    puInfo = cms.InputTag("slimmedAddPileupInfo"), 
+    met   = cms.InputTag("slimmedMETs"),
     triggerList = HLTLIST,
     triggerList_tag = HLTLIST_TAG,
     triggerSet = cms.InputTag("patTriggerUnpacker"),
