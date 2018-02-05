@@ -120,8 +120,8 @@ if useCustomHLT:
     process.Ntuplizer.L2CaloJet_ForIsoPix_IsoCollection = cms.InputTag("hltL2TauPixelIsoTagProducer", "", "MYHLT")
 
 
-if isMC and not useGenMatch:
-    process.Ntuplizer.taus = cms.InputTag("goodTaus")
+if isMC and useGenMatch:
+    process.Ntuplizer.taus = cms.InputTag("genMatchedTaus")
 
 
 if options.JSONfile:
@@ -149,6 +149,14 @@ process.p = cms.Path(
     process.TAndPseq +
     process.NtupleSeq
 )
+
+if isMC and useGenMatch:
+    process.p = cms.Path(
+    	process.electrons +
+    	process.TAndPseq +
+	process.genMatchedSeq +
+   	process.NtupleSeq
+    )
 
 # Silence output
 process.load("FWCore.MessageService.MessageLogger_cfi")
