@@ -36,6 +36,7 @@ class TauTagAndProbeFilter : public edm::EDFilter {
 
         EDGetTokenT<pat::TauRefVector>   _tausTag;
         EDGetTokenT<pat::MuonRefVector>  _muonsTag;
+        EDGetTokenT<pat::MuonRefVector>  _lmuonsTag;
         EDGetTokenT<pat::METCollection>  _metTag;
         bool _useMassCuts;
         EDGetTokenT<edm::View<reco::GsfElectron> >  _electronsTag;
@@ -46,6 +47,7 @@ class TauTagAndProbeFilter : public edm::EDFilter {
 TauTagAndProbeFilter::TauTagAndProbeFilter(const edm::ParameterSet & iConfig) :
 _tausTag  (consumes<pat::TauRefVector>  (iConfig.getParameter<InputTag>("taus"))),
 _muonsTag (consumes<pat::MuonRefVector> (iConfig.getParameter<InputTag>("muons"))),
+_lmuonsTag (consumes<pat::MuonRefVector> (iConfig.getParameter<InputTag>("lmuons"))),
 _metTag   (consumes<pat::METCollection> (iConfig.getParameter<InputTag>("met"))),
 _electronsTag (consumes<edm::View<reco::GsfElectron> > (iConfig.getParameter<edm::InputTag>("electrons"))),
 _eleLooseIdMapTag  (consumes<edm::ValueMap<bool> >(iConfig.getParameter<edm::InputTag>("eleLooseIdMap"))),
@@ -86,6 +88,9 @@ bool TauTagAndProbeFilter::filter(edm::Event & iEvent, edm::EventSetup const& iS
 
     const pat::MuonRef mu = (*muonHandle)[0] ;
 
+    Handle<pat::MuonRefVector> lmuonHandle;
+    iEvent.getByToken (_lmuonsTag, lmuonHandle);
+
     //---------------------   get the met for mt computation etc. -----------------
     Handle<pat::METCollection> metHandle;
     iEvent.getByToken (_metTag, metHandle);
@@ -108,6 +113,17 @@ bool TauTagAndProbeFilter::filter(edm::Event & iEvent, edm::EventSetup const& iS
         math::XYZTLorentzVector pSum = mu->p4() + tau->p4();
         if (_useMassCuts && (pSum.mass() <= 40 || pSum.mass() >= 80)) continue; // visible mass in (40, 80)
         if (deltaR(*tau, *mu) < 0.5) continue;
+
+	double dlR = 1.e+3;
+        for (uint ilmu = 0; ilmu < lmuonHandle->size(); ++ilmu)
+          {
+            const pat::MuonRef lmu = (*lmuonHandle)[ilmu];
+            double tmpR = deltaR(*tau, *lmu);
+            if (tmpR<dlR) dlR = tmpR;
+            //cout<<"dlR "<<dlR<<" tmpR "<<tmpR<<" lmu->pt() "<<lmu->pt()<<" tau->pt() "<<tau->pt()<<endl;  
+          }
+        //if(dlR < 0.5)	cout<<"..........................................................................."<<endl;
+        if(dlR < 0.5) continue;
 
         // min iso
         float isoMVA = tau->tauID("byIsolationMVArun2v1DBoldDMwLTraw");

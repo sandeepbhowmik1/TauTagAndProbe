@@ -1168,7 +1168,7 @@ void ZeroBias::analyze(const edm::Event& iEvent, const edm::EventSetup& eSetup)
   iEvent.getByToken(_chargedHadron_token, chargedHadronAssoc);
   iEvent.getByToken(_piZero_token, piZeroAssoc);
 
-
+  /*
   if(jetView.isValid() && chargedHadronAssoc.isValid() && piZeroAssoc.isValid()){
   
     reco::PFJetRefVector jets = reco::tau::castView<reco::PFJetRefVector>(jetView);
@@ -1179,11 +1179,6 @@ void ZeroBias::analyze(const edm::Event& iEvent, const edm::EventSetup& eSetup)
       const std::vector<reco::PFRecoTauChargedHadron>& chargedHadrons = (*chargedHadronAssoc)[jetRef];
       const std::vector<reco::RecoTauPiZero>& piZeros = (*piZeroAssoc)[jetRef];
      
-      /*this -> _hltPFRegCandJetReg_N++;
-      this -> _hltPFRegCandJetReg_Pt.push_back(jetRegionRef->pt());
-      this -> _hltPFRegCandJetReg_Eta.push_back(jetRegionRef->eta());
-      this -> _hltPFRegCandJetReg_Phi.push_back(jetRegionRef->phi());*/
-
       for(unsigned int i_h=0;i_h<chargedHadrons.size();i_h++){
 	_hltTauPFJetsRecoTauChargedHadronsReg_N++;
 	_hltTauPFJetsRecoTauChargedHadronsReg_Pt.push_back(chargedHadrons[i_h].pt());
@@ -1200,7 +1195,7 @@ void ZeroBias::analyze(const edm::Event& iEvent, const edm::EventSetup& eSetup)
 
     }
   }
-
+  */
 
   edm::Handle< reco::PFTauCollection > PFTauSansRefReg_Handle;
   try {iEvent.getByToken(_hltPFTauSansRefReg_Tag, PFTauSansRefReg_Handle);}  catch (...) {;}
